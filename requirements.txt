@@ -1,0 +1,6 @@
+Flask
+Flask-PyMongo
+pymongo
+python-dotenv
+gunicorn
+reportlab

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Student Scores</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+   
+  </head>
+  <body class="p-4">
+    {% include '_navbar.html' %}
+    <h2>Add Subject Score</h2>
+    <form id="scoreForm">
+      <input class="form-control mb-2" name="student_id" placeholder="Student ID" required />
+      <input class="form-control mb-2" name="subject" placeholder="Subject" required />
+      <input class="form-control mb-2" name="marks_obtained" placeholder="Marks Obtained" required />
+      <input class="form-control mb-2" name="total_marks" placeholder="Total Marks" required />
+      <input class="form-control mb-2" name="exam_date" type="date" required />
+      <button class="btn btn-primary">Submit</button>
+    </form>
+
+    <hr />
+    <h3>Score Table</h3>
+    <table class="table table-bordered" id="scoreTable">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Subject</th>
+          <th>Marks</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <script>
+      document.getElementById('scoreForm').onsubmit = async (e) => {
+        e.preventDefault()
+        const form = new FormData(e.target)
+        const data = Object.fromEntries(form.entries())
+        const res = await fetch('/scores/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        })
+        if (res.ok) alert('Score added!')
+      }
+    </script>
+    <script src="{{ url_for('static', filename='js/subjectChart.js') }}"></script>
+  </body>
+</html>
