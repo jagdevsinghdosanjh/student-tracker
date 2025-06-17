@@ -20,8 +20,14 @@ def create_app():
     from app.routes.scores import score_bp
     from app.routes.main import main_bp
     from app.routes.dashboard import dashboard_bp  # Add this
+    from app.routes.auth import auth_bp
+    
+
+
 
     # Then register it:
+    #app.register_blueprint(auth_bp, url_prefix='/auth')
+    app.register_blueprint(auth_bp)  # NO prefix
     app.register_blueprint(dashboard_bp)  # This line tells Flask about your dashboard routes
     app.register_blueprint(main_bp)
     app.register_blueprint(score_bp, url_prefix='/scores')   

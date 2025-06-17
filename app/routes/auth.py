@@ -1,14 +1,24 @@
+# app/routes/auth.py
+
 import jwt
 import datetime
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template
 from app import mongo
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 auth_bp = Blueprint('auth', __name__)
-SECRET_KEY="d10952582a68ffc37c05a283d1715aedd5d1890256f73475d8b5972bd6d10608"
+SECRET_KEY = os.getenv("SECRET_KEY", "default_secret_key")
 
+# 🔐 Login API (POST)
 @auth_bp.route('/login', methods=['POST'])
-def login():
+def login_api():
     data = request.get_json()
+    if not data or "username" not in data or "password" not in data:
+        return jsonify({"error": "Username and password required"}), 400
+
     user = mongo.db.users.find_one({"username": data["username"]})
     if not user or user["password"] != data["password"]:
         return jsonify({"error": "Invalid credentials"}), 401
@@ -19,3 +29,9 @@ def login():
     }, SECRET_KEY, algorithm="HS256")
 
     return jsonify({"token": token})
+
+
+# 🧭 Login Page (GET)
+@auth_bp.route('/login', methods=['GET'])
+def login_page():
+    return render_template('login.html')
