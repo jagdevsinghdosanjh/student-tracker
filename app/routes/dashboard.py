@@ -1,7 +1,16 @@
-from flask import render_template, Blueprint
+# In dashboard.py
+from flask import Blueprint, render_template
 
-score_bp = Blueprint('score', __name__)
+dashboard_bp = Blueprint('dashboard', __name__)
 
-@score_bp.route('/')
+@dashboard_bp.route('/dashboard')
 def dashboard():
     return render_template('dashboard.html')
+
+# from flask import render_template, Blueprint
+
+# score_bp = Blueprint('score', __name__)
+
+# @score_bp.route('/')
+# def dashboard():
+#     return render_template('dashboard.html')
