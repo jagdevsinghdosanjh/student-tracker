@@ -78,6 +78,7 @@ def delete_photo(photo_id):
         return jsonify({"message": "Photo deleted successfully"}), 200
     else:
         return jsonify({"error": "Photo not found"}), 404   
+
 # 📝 Update student details
 @student_bp.route('/<student_id>', methods=['PUT'])
 @token_required
@@ -107,6 +108,7 @@ def update_student(student_id):
         return jsonify({"error": "Student not found"}), 404
 
     return jsonify({"message": "Student updated successfully"}), 200        
+
 # 🗑️ Delete a student   
 @student_bp.route('/<student_id>', methods=['DELETE'])
 @token_required
@@ -117,6 +119,7 @@ def delete_student(student_id):
         return jsonify({"error": "Student not found"}), 404
 
     return jsonify({"message": "Student deleted successfully"}), 200    
+
 # ▶️ View student
 @student_bp.route('/<student_id>', methods=['GET'])
 @token_required
@@ -128,6 +131,7 @@ def view_student(student_id):
     scores = list(mongo.db.scores.find({"student_id": ObjectId(student_id)}))
     
     return render_template('student_detail.html', student=student, scores=scores)
+
 # ▶️ View student scores
 @student_bp.route('/<student_id>/scores', methods=['GET'])
 @token_required
@@ -138,6 +142,7 @@ def view_student_scores(student_id):
         return jsonify({"message": "No scores found for this student"}), 404
 
     return render_template('student_scores.html', scores=scores)
+
 # ▶️ Add a score for a student
 @student_bp.route('/<student_id>/scores', methods=['POST'])
 @token_required
@@ -158,6 +163,7 @@ def add_student_score(student_id):
 
     result = mongo.db.scores.insert_one(score_doc)
     return jsonify({"message": "Score added successfully", "id": str(result.inserted_id)}), 201
+
 # ▶️ Update a student's score
 @student_bp.route('/<student_id>/scores/<score_id>', methods=['PUT'])
 @token_required
@@ -183,6 +189,7 @@ def update_student_score(student_id, score_id):
         return jsonify({"error": "Score not found"}), 404
 
     return jsonify({"message": "Score updated successfully"}), 200
+
 # ▶️ Delete a student's score
 @student_bp.route('/<student_id>/scores/<score_id>', methods=['DELETE'])
 @student_bp.route('/<student_id>/scores/<score_id>', methods=['DELETE'])
@@ -194,3 +201,15 @@ def delete_student_score(student_id, score_id):
         return jsonify({"error": "Score not found"}), 404
 
     return jsonify({"message": "Score deleted successfully"}), 200  
+
+score_bp = Blueprint('score', __name__)
+
+@score_bp.route('/')
+def dashboard():
+    return render_template('dashboard.html')
+# Register the blueprint
+def register_routes(app):
+    app.register_blueprint(student_bp, url_prefix='/students')
+    app.register_blueprint(score_bp, url_prefix='/scores')
+    
+    
