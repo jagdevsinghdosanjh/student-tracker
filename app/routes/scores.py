@@ -115,3 +115,28 @@ def score_dashboard_page():
 def score_analytics_page():
     return render_template('score_analytics.html')
 
+@score_bp.route('/all', methods=['GET'])
+def all_scores():
+    scores = mongo.db.scores.find().sort("exam_date", -1)
+    result = []
+    for s in scores:
+        student = mongo.db.students.find_one({"_id": s["student_id"]})
+        result.append({
+            "student": student["full_name"] if student else "Unknown",
+            "subject": s["subject"],
+            "marks_obtained": s["marks_obtained"],
+            "total_marks": s["total_marks"],
+            "percentage": round((s["marks_obtained"] / s["total_marks"]) * 100, 2),
+            "exam_date": s["exam_date"]
+        })
+    return jsonify(result)
+
+
+@score_bp.route('/analytics/subject-distribution', methods=['GET'])
+def subject_distribution():
+    pipeline = [
+        {"$group": {"_id": "$subject", "count": {"$sum": 1}}},
+        {"$project": {"subject": "$_id", "count": 1, "_id": 0}}
+    ]
+    result = list(mongo.db.scores.aggregate(pipeline))
+    return jsonify(result)
