@@ -1,0 +1,128 @@
+{% include '_navbar.html' %}
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scores Dashboard</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/score_dashboard.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/score_analytics.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/score_details.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/score_form.css') }}">
+
+<script>
+fetch('/scores/all')
+  .then(res => res.json())
+  .then(data => {
+    const table = document.getElementById('scoreTable');
+    data.forEach(row => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${row.student}</td>
+        <td>${row.subject}</td>
+        <td>${row.marks_obtained} / ${row.total_marks}</td>
+        <td>${row.percentage}%</td>
+        <td>${new Date(row.exam_date).toLocaleDateString()}</td>`;
+      table.appendChild(tr);
+    });
+  });
+</script>
+
+<!-- Inside scores_dashboard.html -->
+<table class="table table-bordered mt-4" id="scoreTable">
+  <thead>
+    <tr>
+      <th>Student</th>
+      <th>Subject</th>
+      <th>Marks</th>
+      <th>Percentage</th>
+      <th>Exam Date</th>
+      <th>Report</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+  async function loadScores() {
+    const res = await fetch('/scores/all');
+    const data = await res.json();
+    const tbody = document.querySelector("#scoreTable tbody");
+    const used = new Set();
+
+    data.forEach(score => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${score.student}</td>
+        <td>${score.subject}</td>
+        <td>${score.marks_obtained} / ${score.total_marks}</td>
+        <td>${score.percentage}%</td>
+        <td>${score.exam_date}</td>
+        <td>
+          ${
+            !used.has(score.student)
+              ? `<button class="btn btn-sm btn-outline-primary" href="/scores/report/${encodeURIComponent(score.student_id)}" target="_blank">Download Report</button>`
+              : ''
+          }
+        </td>
+      `;
+      used.add(score.student);
+      tbody.appendChild(row);
+    });
+  }
+
+  loadScores();
+function downloadReport(studentId, studentName) {
+  fetch(`/scores/report/${studentId}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': 'Bearer ' + localStorage.getItem('token')
+    }
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("Access denied or session expired.");
+    return res.blob();
+  })
+  .then(blob => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${studentName.replace(/\\s+/g, '_')}_Report.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  })
+  .catch(err => {
+    alert("Failed to download: " + err.message);
+  });
+}
+
+
+</script>
+
+</head>
+<body class="p-4">
+  <div class="container">
+    <h3>Scores Dashboard</h3>
+    <p>This page is under construction. Stay tuned for updates!</p>
+  </div>
+  <table class="table table-bordered">
+  <thead class="table-dark">
+    <tr>
+      <th>Student</th>
+      <th>Subject</th>
+      <th>Marks</th>
+      <th>Percentage</th>
+      <th>Exam Date</th>
+    </tr>
+  </thead>
+  <tbody id="scoreTable"></tbody>
+</table>
+
+</body>
+</html>

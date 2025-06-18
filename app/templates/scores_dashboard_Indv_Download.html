@@ -13,12 +13,8 @@
 </head>
 <body class="p-4">
   <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h3>Student Scores Dashboard</h3>
-      <button class="btn btn-success" onclick="downloadAllReports()">Download All Reports</button>
-    </div>
-
-    <table class="table table-bordered" id="scoreTable">
+    <h3>Student Scores Dashboard</h3>
+    <table class="table table-bordered mt-4" id="scoreTable">
       <thead>
         <tr>
           <th>Student</th>
@@ -31,14 +27,10 @@
       </thead>
       <tbody></tbody>
     </table>
-
     <div id="msg" class="text-danger mt-3"></div>
   </div>
 
   <script>
-    const token = localStorage.getItem('token');
-    const downloaded = new Set();
-
     async function loadScores() {
       try {
         const res = await fetch('/scores/all');
@@ -61,7 +53,6 @@
             </td>
           `;
           seen.add(score.student_id);
-          downloaded.add(JSON.stringify({ id: score.student_id, name: score.student }));
           tbody.appendChild(row);
         });
       } catch (error) {
@@ -73,7 +64,9 @@
     function downloadReport(studentId, studentName) {
       fetch(`/scores/report/${studentId}`, {
         method: 'GET',
-        headers: { 'Authorization': 'Bearer ' + token }
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
       })
       .then(res => {
         if (!res.ok) throw new Error("Access denied or session expired");
@@ -89,14 +82,8 @@
         a.remove();
       })
       .catch(err => {
-        alert("Download failed for " + studentName + ": " + err.message);
-      });
-    }
-
-    function downloadAllReports() {
-      downloaded.forEach(entry => {
-        const { id, name } = JSON.parse(entry);
-        downloadReport(id, name);
+        document.getElementById('msg').innerText = "Download failed: " + err.message;
+        console.error(err);
       });
     }
 

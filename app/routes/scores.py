@@ -110,7 +110,10 @@ def all_scores():
             "marks_obtained": s["marks_obtained"],
             "total_marks": s["total_marks"],
             "percentage": round((s["marks_obtained"] / s["total_marks"]) * 100, 2),
-            "exam_date": s["exam_date"]
+            "exam_date": s["exam_date"],
+            "student_id": str(s["student_id"]),
+            "created_at": s["created_at"],
+            "updated_at": s["updated_at"]            
         })
     return jsonify(result)
 
