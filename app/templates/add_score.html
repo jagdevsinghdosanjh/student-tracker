@@ -1,10 +1,10 @@
 {% include '_navbar.html' %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Add Student Score</title>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Add Student Score</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <script>
     if (!localStorage.getItem('token')) {
@@ -29,34 +29,54 @@
   </div>
 
   <script>
-    // Populate student dropdown
+    // Populate student dropdown from backend
     async function populateStudents() {
-      const res = await fetch('/students/dropdown');
-      const students = await res.json();
-      const dropdown = document.getElementById('student_id');
-      students.forEach(s => {
-        dropdown.innerHTML += `<option value="${s.id}">${s.name}</option>`;
-      });
+      try {
+        const res = await fetch('/students/dropdown');
+        const students = await res.json();
+        const dropdown = document.getElementById('student_id');
+        students.forEach(s => {
+          dropdown.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+        });
+      } catch (err) {
+        console.error("Failed to load student list:", err);
+      }
     }
-    populateStudents();
 
     // Handle form submission
     document.getElementById('scoreForm').onsubmit = async (e) => {
       e.preventDefault();
-      const formData = Object.fromEntries(new FormData(e.target).entries());
+      const form = new FormData(e.target);
+      const payload = {
+        student_id: form.get('student_id'),
+        subject: form.get('subject').trim(),
+        marks_obtained: parseFloat(form.get('marks_obtained')),
+        total_marks: parseFloat(form.get('total_marks')),
+        exam_date: form.get('exam_date')
+      };
 
-      const res = await fetch('/scores/', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + localStorage.getItem('token'),
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
+      try {
+        const res = await fetch('/scores/', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('token'),
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
 
-      const result = await res.json();
-      document.getElementById('msg').innerText = result.message || result.error;
+        const result = await res.json();
+        const msgEl = document.getElementById('msg');
+        msgEl.innerText = result.message || result.error;
+        msgEl.classList.toggle('text-success', res.ok);
+        msgEl.classList.toggle('text-danger', !res.ok);
+      } catch (error) {
+        document.getElementById('msg').innerText = "Submission failed. Please try again.";
+        console.error(error);
+      }
     };
+
+    populateStudents();
   </script>
 </body>
 </html>
