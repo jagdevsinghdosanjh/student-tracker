@@ -8,6 +8,11 @@ import io
 
 student_bp = Blueprint('students', __name__)
 
+@student_bp.route('/list', methods=['GET'])
+def student_list_page():
+    return render_template('students_list.html')
+
+
 # 🎨 Serve Add Student Form UI
 @student_bp.route('/form', methods=['GET'])
 def student_form():

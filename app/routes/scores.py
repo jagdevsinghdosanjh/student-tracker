@@ -104,3 +104,14 @@ def get_recent_scores():
 @score_bp.route('/form', methods=['GET'])
 def score_form():
     return render_template('add_score.html')
+
+# View for Scores Dashboard (List of Scores)
+@score_bp.route('/dashboard', methods=['GET'])
+def score_dashboard_page():
+    return render_template('scores_dashboard.html')
+
+# View for Score Analytics Page (Charts, summaries)
+@score_bp.route('/analytics', methods=['GET'])
+def score_analytics_page():
+    return render_template('score_analytics.html')
+
