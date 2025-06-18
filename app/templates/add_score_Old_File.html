@@ -29,6 +29,7 @@
   </div>
 
   <script>
+    // Populate student dropdown from backend
     async function populateStudents() {
       try {
         const res = await fetch('/students/dropdown');
@@ -42,6 +43,7 @@
       }
     }
 
+    // Handle form submission
     document.getElementById('scoreForm').onsubmit = async (e) => {
       e.preventDefault();
       const form = new FormData(e.target);
@@ -52,14 +54,6 @@
         total_marks: parseFloat(form.get('total_marks')),
         exam_date: form.get('exam_date')
       };
-
-      const msgEl = document.getElementById('msg');
-      if (payload.marks_obtained > payload.total_marks) {
-        msgEl.innerText = "Marks obtained cannot exceed total marks.";
-        msgEl.classList.remove('text-success');
-        msgEl.classList.add('text-danger');
-        return;
-      }
 
       try {
         const res = await fetch('/scores/', {
@@ -72,11 +66,12 @@
         });
 
         const result = await res.json();
+        const msgEl = document.getElementById('msg');
         msgEl.innerText = result.message || result.error;
         msgEl.classList.toggle('text-success', res.ok);
         msgEl.classList.toggle('text-danger', !res.ok);
       } catch (error) {
-        msgEl.innerText = "Submission failed. Please try again.";
+        document.getElementById('msg').innerText = "Submission failed. Please try again.";
         console.error(error);
       }
     };
