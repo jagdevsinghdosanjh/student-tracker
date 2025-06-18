@@ -1,3 +1,5 @@
+# app/routes/students.py
+
 from flask import Blueprint, request, jsonify, render_template, send_file
 from bson.objectid import ObjectId
 from datetime import datetime
@@ -5,24 +7,16 @@ from app import mongo
 from app.utils.auth_utils import token_required
 from app.utils.image_handler import save_image, get_image, delete_image
 import io
+from flask import render_template
 
 student_bp = Blueprint('students', __name__)
 
-# 🎨 Serve Add Student Form UI
 @student_bp.route('/form', methods=['GET'])
 def student_form():
     return render_template('add_student.html')
 
 
-# 🔄 Utility API: Return All Students as JSON for Dropdowns
-@student_bp.route('/dropdown', methods=['GET'])
-def student_dropdown():
-    students = mongo.db.students.find({}, {"full_name": 1})
-    result = [{"id": str(s["_id"]), "name": s["full_name"]} for s in students]
-    return jsonify(result)
-
-
-# ➕ Add a New Student (Backend API)
+# 🆕 Add a new student
 @student_bp.route('/', methods=['POST'])
 @token_required
 def add_student():
@@ -50,7 +44,7 @@ def add_student():
     return jsonify({"message": "Student added successfully", "id": str(result.inserted_id)}), 201
 
 
-# 📥 Fetch All Students (Backend API)
+# 📥 Fetch all students
 @student_bp.route('/', methods=['GET'])
 def get_students():
     students = mongo.db.students.find()
@@ -72,7 +66,7 @@ def get_students():
     return jsonify(result), 200
 
 
-# 📸 Get Photo by ID
+# 🖼️ View student photo
 @student_bp.route('/photo/<photo_id>', methods=['GET'])
 @token_required
 def get_photo(photo_id):
@@ -83,7 +77,7 @@ def get_photo(photo_id):
         return jsonify({"error": "Photo not found"}), 404
 
 
-# ❌ Delete Photo
+# ❌ Delete student photo
 @student_bp.route('/photo/<photo_id>', methods=['DELETE'])
 @token_required
 def delete_photo(photo_id):
@@ -93,7 +87,7 @@ def delete_photo(photo_id):
         return jsonify({"error": "Photo not found"}), 404
 
 
-# ✏️ Update Student
+# ✏️ Update student
 @student_bp.route('/<student_id>', methods=['PUT'])
 @token_required
 def update_student(student_id):
@@ -114,7 +108,8 @@ def update_student(student_id):
     }
 
     if photo:
-        student_doc["photo_id"] = save_image(photo)
+        photo_id = save_image(photo)
+        student_doc["photo_id"] = photo_id
 
     result = mongo.db.students.update_one({"_id": ObjectId(student_id)}, {"$set": student_doc})
     if result.matched_count == 0:
@@ -123,7 +118,7 @@ def update_student(student_id):
     return jsonify({"message": "Student updated successfully"}), 200
 
 
-# 🗑️ Delete Student
+# ❌ Delete student
 @student_bp.route('/<student_id>', methods=['DELETE'])
 @token_required
 def delete_student(student_id):
@@ -133,7 +128,7 @@ def delete_student(student_id):
     return jsonify({"message": "Student deleted successfully"}), 200
 
 
-# 📄 View Profile with Scores
+# 📄 View student profile with scores
 @student_bp.route('/<student_id>', methods=['GET'])
 @token_required
 def view_student(student_id):
@@ -142,11 +137,11 @@ def view_student(student_id):
         return jsonify({"error": "Student not found"}), 404
 
     scores = list(mongo.db.scores.find({"student_id": ObjectId(student_id)}))
-    student["_id"] = str(student["_id"])  # For Jinja safety
+    student["_id"] = str(student["_id"])  # Needed for safe Jinja2 rendering
     return render_template('student_detail.html', student=student, scores=scores)
 
 
-# 📊 View Student Scores Page
+# 📊 View student scores separately
 @student_bp.route('/<student_id>/scores', methods=['GET'])
 @token_required
 def view_student_scores(student_id):
@@ -156,7 +151,7 @@ def view_student_scores(student_id):
     return render_template('student_scores.html', scores=scores)
 
 
-# ➕ Add Score to a Student
+# ➕ Add a score for student
 @student_bp.route('/<student_id>/scores', methods=['POST'])
 @token_required
 def add_student_score(student_id):
@@ -168,7 +163,7 @@ def add_student_score(student_id):
         "student_id": ObjectId(student_id),
         "subject": data['subject'],
         "marks_obtained": data['score'],
-        "total_marks": 100,
+        "total_marks": 100,  # default or adjust via UI later
         "exam_date": data['date'],
         "created_at": datetime.utcnow(),
         "updated_at": datetime.utcnow()
@@ -178,7 +173,7 @@ def add_student_score(student_id):
     return jsonify({"message": "Score added successfully", "id": str(result.inserted_id)}), 201
 
 
-# ✏️ Update a Student's Score
+# ✏️ Update a student's score
 @student_bp.route('/<student_id>/scores/<score_id>', methods=['PUT'])
 @token_required
 def update_student_score(student_id, score_id):
@@ -204,14 +199,11 @@ def update_student_score(student_id, score_id):
     return jsonify({"message": "Score updated successfully"}), 200
 
 
-# ❌ Delete Score
+# ❌ Delete a student's score
 @student_bp.route('/<student_id>/scores/<score_id>', methods=['DELETE'])
 @token_required
 def delete_student_score(student_id, score_id):
-    result = mongo.db.scores.delete_one({
-        "_id": ObjectId(score_id),
-        "student_id": ObjectId(student_id)
-    })
+    result = mongo.db.scores.delete_one({"_id": ObjectId(score_id), "student_id": ObjectId(student_id)})
     if result.deleted_count == 0:
         return jsonify({"error": "Score not found"}), 404
     return jsonify({"message": "Score deleted successfully"}), 200

@@ -6,6 +6,7 @@ from bson.objectid import ObjectId
 from app.utils.auth_utils import token_required
 from flask import send_file
 from app.utils.pdf_generator import generate_student_report
+from flask import render_template
 
 score_bp = Blueprint('scores', __name__)
 
@@ -86,3 +87,20 @@ def download_report(student_id):
     filename = f"{student['full_name'].replace(' ', '_')}_Report.pdf"
     return send_file(pdf_buffer, as_attachment=True, download_name=filename, mimetype='application/pdf')
 
+@score_bp.route('/dashboard/recent', methods=['GET'])
+def get_recent_scores():
+    scores = mongo.db.scores.find().sort("exam_date", -1).limit(10)
+    result = []
+    for s in scores:
+        student = mongo.db.students.find_one({"_id": s["student_id"]})
+        result.append({
+            "studentName": student["full_name"] if student else "Unknown",
+            "subject": s["subject"],
+            "percentage": round((s["marks_obtained"] / s["total_marks"]) * 100, 2),
+            "date": s["exam_date"]
+        })
+    return jsonify(result)
+
+@score_bp.route('/form', methods=['GET'])
+def score_form():
+    return render_template('add_score.html')

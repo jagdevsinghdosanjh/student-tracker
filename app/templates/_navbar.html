@@ -3,10 +3,24 @@
     <a class="navbar-brand" href="/">SPT</a>
     <div class="collapse navbar-collapse">
       <ul class="navbar-nav me-auto">
-        <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link" href="/students">Students</a></li>
-        <li class="nav-item"><a class="nav-link" href="/scores/dashboard">Scores</a></li>
-        <li class="nav-item"><a class="nav-link" href="/scores/analytics">Analytics</a></li>
+        <li class="nav-item">
+          <a class="nav-link" href="/dashboard">Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/students">Students</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/scores/dashboard">Scores</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/scores/analytics">Analytics</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/students/form">Add Student</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/scores/form">Add Score</a>
+        </li>
       </ul>
       <button class="btn btn-outline-light" onclick="logout()">Logout</button>
     </div>
@@ -15,7 +29,7 @@
 
 <script>
   function logout() {
-    localStorage.removeItem('token');
-    window.location.href = '/login';
+    localStorage.removeItem('token')
+    window.location.href = '/login'
   }
 </script>
