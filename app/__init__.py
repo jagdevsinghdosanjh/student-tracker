@@ -1,3 +1,5 @@
+# app/__init__.py
+
 from flask import Flask
 from flask_pymongo import PyMongo
 from dotenv import load_dotenv
@@ -22,9 +24,6 @@ def create_app():
     from app.routes.dashboard import dashboard_bp  # Add this
     from app.routes.auth import auth_bp
     
-
-
-
     # Then register it:
     #app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(auth_bp)  # NO prefix

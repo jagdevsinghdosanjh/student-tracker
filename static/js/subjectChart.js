@@ -1,3 +1,5 @@
+//inside static/js/subjectChart.js
+ 
 const token = localStorage.getItem('token');
 fetch('/scores/analytics/subject-averages', {
   headers: { 'Authorization': 'Bearer ' + token }

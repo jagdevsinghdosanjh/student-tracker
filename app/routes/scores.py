@@ -1,3 +1,4 @@
+from bson.son import SON
 from flask import Blueprint, request, jsonify
 from app import mongo
 from datetime import datetime
@@ -5,7 +6,6 @@ from bson.objectid import ObjectId
 from app.utils.auth_utils import token_required
 from flask import send_file
 from app.utils.pdf_generator import generate_student_report
-
 
 score_bp = Blueprint('scores', __name__)
 
@@ -42,6 +42,36 @@ def get_scores_by_student(student_id):
             "exam_date": s["exam_date"]
         })
     return jsonify(result), 200
+
+@score_bp.route('/dashboard/recent', methods=['GET'])
+@token_required
+def recent_scores():
+    scores = mongo.db.scores.find().sort("exam_date", -1).limit(10)
+    enriched = []
+    for s in scores:
+        student = mongo.db.students.find_one({"_id": s["student_id"]})
+        enriched.append({
+            "studentName": student["full_name"] if student else "Unknown",
+            "subject": s["subject"],
+            "percentage": round((s["marks_obtained"] / s["total_marks"]) * 100, 2),
+            "date": s["exam_date"]
+        })
+    return jsonify(enriched)
+
+@score_bp.route('/analytics/subject-averages', methods=['GET'])
+def subject_averages():
+    pipeline = [
+        {"$group": {
+            "_id": "$subject",
+            "average": {"$avg": {"$multiply": [{"$divide": ["$marks_obtained", "$total_marks"]}, 100]}}
+        }},
+        {"$project": {"subject": "$_id", "average": {"$round": ["$average", 2]}}},
+        {"$sort": SON([("subject", 1)])}
+    ]
+    result = list(mongo.db.scores.aggregate(pipeline))
+    return jsonify(result)
+
+
 
 @score_bp.route('/report/<student_id>', methods=['GET'])
 @token_required

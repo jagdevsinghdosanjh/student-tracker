@@ -9,6 +9,8 @@
 # load_dotenv()
 # SECRET_KEY = os.getenv("SECRET_KEY")
 
+# app/utils/auth_utils.py
+
 from functools import wraps
 from flask import request, jsonify
 import jwt

@@ -1,3 +1,5 @@
+# app/utils/image_handler.py
+
 from gridfs import GridFS
 from bson.objectid import ObjectId
 from flask import current_app

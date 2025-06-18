@@ -1,10 +1,46 @@
+{% include '_navbar.html' %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Student Progress Tracker</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<style>
+    body {
+      padding-top: 20px;
+    }
+    .container {
+      max-width: 800px;
+    }
+  </style>
 <script>
   if (!localStorage.getItem('token')) {
     window.location.href = '/login';
   }
 </script>
-
-{% include '_navbar.html' %}
+<title>Welcome to Dashboard</title>
+</head>
+<body>
+<div class="container">
+  <h1 class="mt-4">Dashboard</h1>
+  <p>Welcome to the Student Progress Tracker Dashboard!</p>
+  {% comment %} <p>Use the navigation bar to access different sections.</p> {% endcomment %}
+</div>
+<div class="container">
+  <h4 class="mb-3">Recent Student Scores</h4>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Student Name</th>
+        <th>Subject</th>
+        <th>Score (%)</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody id="recentScores">
+      <!-- Recent scores will be populated here -->
+    </tbody>
+  </table>          
 <div class="container">
   <h4 class="mb-3">Subject-wise Performance Overview</h4>
   <canvas id="subjectChart" width="600" height="300"></canvas>
@@ -31,3 +67,25 @@
   }
   loadChart();
 </script>
+
+<script>
+fetch('/scores/dashboard/recent', {
+  headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+})
+  .then(res => res.json())
+  .then(data => {
+    const tbody = document.querySelector('#recentScores');
+    data.forEach(row => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${row.studentName}</td>
+          <td>${row.subject}</td>
+          <td>${row.percentage}%</td>
+          <td>${new Date(row.date).toLocaleDateString()}</td>
+        </tr>`;
+    });
+  });
+</script>
+
+</body>
+</html>
