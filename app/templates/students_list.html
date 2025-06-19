@@ -21,8 +21,8 @@
     <table class="table table-striped table-bordered">
       <thead class="table-dark">
         <tr>
+          <th style="text-align:center">Roll No</th>
           <th>Name</th>
-          <th>Roll No</th>
           <th>Class</th>
           <th>DOB</th>
           <th>Guardian Contact</th>
@@ -44,8 +44,8 @@
         students.forEach(s => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
+            <td style="text-align:center">${s.roll_number}</td>
             <td>${s.full_name}</td>
-            <td>${s.roll_number}</td>
             <td>${s.class_name}</td>
             <td>${s.date_of_birth}</td>
             <td>${s.guardian_contact}</td>
